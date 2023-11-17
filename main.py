@@ -135,17 +135,34 @@ class operation_option_type:
         self.hitbox.move_ip(move_by_x, move_by_y)
         
 class boss_type:
-    def __init__(self, name, position_x, position_y, width, height):
+    def __init__(self, name, position_x, position_y, width, height, image_file_basename):
         self.name = name
         self.position_x = position_x
         self.position_y = position_y
         self.width = width
         self.height = height
+        self.path = os.path.join("assets", image_file_basename)
+        self.surface_unscaled = pygame.image.load(self.path)
+        self.surface_scaled = pygame.transform.scale(self.surface_unscaled, (self.width, self.height))
+        self.hitbox = pygame.rect.Rect(self.position_x, self.position_y, self.width, self.height)
+        
+    def move(self, move_by_x, move_by_y):
+        self.position_x += move_by_x
+        self.position_y += move_by_y
+        self.hitbox.move_ip(move_by_x, move_by_y)
         
 class gamestats:
     def __init__(self, sum_counter, checkpoints_counter):
         self.sum_counter = sum_counter
         self.checkpoints_counter = checkpoints_counter
+        self.maximum_sum = 1
+        
+    def maximum_change(self, num):
+        maximum_num = max(calculation(num, left_operation.operation), calculation(num, right_operation.operation))
+        if maximum_num > num:
+            return maximum_num
+        else:
+            return num
 
 def load_sprite_property():
     global sprite
@@ -215,7 +232,7 @@ def load_level_attribute():
                 right_operation = operation_option_type(screen_width / 2 + 100, 0, arithmetic_operators)
                 left_operation.generate_random_operation()
                 right_operation.generate_random_operation()
-                boss = boss_type(level_prop["boss"]["name"], level_prop["boss"]["position_x"], level_prop["boss"]["position_y"], level_prop["boss"]["width"], level_prop["boss"]["height"])
+                boss = boss_type(level_prop["boss"]["name"], level_prop["boss"]["position_x"], level_prop["boss"]["position_y"], level_prop["boss"]["width"], level_prop["boss"]["height"], level_prop["boss"]["image_file_basename"])
                 break
 
 def load_stats():
@@ -246,12 +263,15 @@ def draw_main_screen():
     # initialize the screen by filling it with color white
     screen.fill(screen_bgcolor)
     
-    # print the operation
-    pygame.draw.rect(screen, ImageColor.getrgb("green"), left_operation.hitbox, 0) # left
-    screen.blit(left_operation.txt_surface, left_operation.txt_surface_rect)
-    
-    pygame.draw.rect(screen, ImageColor.getrgb("green"), right_operation.hitbox, 0) # right
-    screen.blit(right_operation.txt_surface, right_operation.txt_surface_rect)
+    # print the operation / boss
+    if stats.checkpoints_counter <= 10:
+        pygame.draw.rect(screen, ImageColor.getrgb("green"), left_operation.hitbox, 0) # left
+        screen.blit(left_operation.txt_surface, left_operation.txt_surface_rect)
+        
+        pygame.draw.rect(screen, ImageColor.getrgb("green"), right_operation.hitbox, 0) # right
+        screen.blit(right_operation.txt_surface, right_operation.txt_surface_rect)
+    else:
+        screen.blit(boss.surface_scaled, (margin_rect_width / 2, boss.position_y))
     
     # print the wall objects
     for wall in wall_objects:
@@ -264,6 +284,8 @@ def draw_main_screen():
     screen.blit(sprite.surface_scaled, (sprite.position_x, sprite.position_y))
     
     # print stats on the right side of the screen
+    sum_counter_surface = FONT.render(str(stats.sum_counter), True, ImageColor.getrgb("black"))
+    screen.blit(sum_counter_surface, (margin_rect_width + 50, screen_height / 2))
 
     pygame.display.update()
         
@@ -280,14 +302,19 @@ def main(): # for your information, in short, this function will be executed onc
             sprite.movement_check(event)
         
         if stats.checkpoints_counter <= 10:
-            if operation_check() and left_operation.position_y <= screen_height:
+            if operation_check() or left_operation.position_y > screen_height:
                 left_operation.initialize()
                 right_operation.initialize()
                 left_operation.generate_random_operation()
-                right_operation.generate_random_operation()  
+                right_operation.generate_random_operation()
+                stats.maximum_sum = stats.maximum_change(stats.maximum_sum)
             else:
                 left_operation.move(0, speed)
                 right_operation.move(0, speed)
+        else:
+            boss.move(0, speed)
+            
+            
         
         sprite.movement_prompt()
         
