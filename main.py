@@ -35,10 +35,10 @@ class sprite_type:
                 self.move_right = True
             if event.key == pygame.K_LEFT:
                 self.move_left = True
-            #if event.key == pygame.K_DOWN:
-            #    self.move_down = True
-            #if event.key == pygame.K_UP:
-            #    self.move_up = True
+            if event.key == pygame.K_DOWN:
+                self.move_down = True
+            if event.key == pygame.K_UP:
+                self.move_up = True
             if event.key == pygame.K_LSHIFT:
                 self.sprint = True
                 
@@ -47,10 +47,10 @@ class sprite_type:
                 self.move_right = False
             if event.key == pygame.K_LEFT:
                 self.move_left = False
-            #if event.key == pygame.K_DOWN:
-            #    self.move_down = False
-            #if event.key == pygame.K_UP:
-            #    self.move_up = False
+            if event.key == pygame.K_DOWN:
+                self.move_down = False
+            if event.key == pygame.K_UP:
+                self.move_up = False
             if event.key == pygame.K_LSHIFT:
                 self.sprint = False
     
@@ -61,11 +61,12 @@ class sprite_type:
             self.position_x += 3
         if self.move_left:
             self.position_x -= 3
-        #if self.move_down:
-        #    self.position_y += 3
-        #if self.move_up:
-        #    self.position_y -= 3   
-        
+####################################################
+        if self.move_down:
+            self.position_y += 3
+        if self.move_up:
+            self.position_y -= 3   
+#####################################################      
         self.hitbox = pygame.Rect(self.position_x, self.position_y, self.width, self.height)
         for wall in wall_objects:
             if self.hitbox.colliderect(wall.hitbox): # basically, this block checks sprite's collision with obstacles
@@ -144,11 +145,13 @@ class boss_type:
         self.path = os.path.join("assets", image_file_basename)
         self.surface_unscaled = pygame.image.load(self.path)
         self.surface_scaled = pygame.transform.scale(self.surface_unscaled, (self.width, self.height))
-        self.hitbox = pygame.rect.Rect(self.position_x, self.position_y, self.width, self.height)
+        self.surface_scaled_rect = self.surface_scaled.get_rect(center = (margin_rect_width / 2, self.position_y))
+        self.hitbox = pygame.rect.Rect(self.surface_scaled_rect)
         
     def move(self, move_by_x, move_by_y):
         self.position_x += move_by_x
         self.position_y += move_by_y
+        self.surface_scaled_rect.move_ip(move_by_x, move_by_y)
         self.hitbox.move_ip(move_by_x, move_by_y)
         
 class gamestats:
@@ -271,7 +274,7 @@ def draw_main_screen():
         pygame.draw.rect(screen, ImageColor.getrgb("green"), right_operation.hitbox, 0) # right
         screen.blit(right_operation.txt_surface, right_operation.txt_surface_rect)
     else:
-        screen.blit(boss.surface_scaled, (margin_rect_width / 2, boss.position_y))
+        screen.blit(boss.surface_scaled, boss.surface_scaled_rect)
     
     # print the wall objects
     for wall in wall_objects:
@@ -312,7 +315,7 @@ def main(): # for your information, in short, this function will be executed onc
                 left_operation.move(0, speed)
                 right_operation.move(0, speed)
         else:
-            boss.move(0, speed)
+            boss.move(0, speed / 3)
             
             
         
