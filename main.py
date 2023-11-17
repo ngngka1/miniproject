@@ -122,7 +122,7 @@ class operation_option_type:
         self.number = random.randint(1, maximum_operation_number) 
         self.operation = self.operator + str(self.number)
         self.txt_surface = FONT.render(self.operation, True, ImageColor.getrgb("black"), ImageColor.getrgb("green"))
-        self.txt_surface_rect = self.txt_surface.get_rect(center = ((abs(screen_width * int(self.position_x / (screen_width / 2)) - margin_width) + (screen_width / 2)) / 2, self.position_y))
+        self.txt_surface_rect = self.txt_surface.get_rect(center = ((abs(margin_rect_width * int(self.position_x / (margin_rect_width / 2)) - margin_width) + (margin_rect_width / 2)) / 2, self.position_y))
         self.hitbox = pygame.rect.Rect(self.txt_surface_rect)
     
     def initialize(self):
@@ -187,6 +187,10 @@ def load_wall_objects():
                     if margin_object["name"] == "top_margin":
                         global margin_height
                         margin_height = margin_object["height"]
+                        global margin_rect_width
+                        margin_rect_width = margin_object["width"]
+                        global margin_rect_height
+                        margin_rect_height = screen_height
                         
                 for obstacle_object in level_prop["obstacles"]:
                     if obstacle_object["color"]:
@@ -221,19 +225,14 @@ def load_stats():
 def operation_check():
     if sprite.hitbox.colliderect(left_operation.hitbox):
         stats.sum_counter = calculation(stats.sum_counter, left_operation.operation)
-        left_operation.initialize()
-        right_operation.initialize()
         stats.checkpoints_counter += 1
     elif sprite.hitbox.colliderect(right_operation.hitbox):
         stats.sum_counter = calculation(stats.sum_counter, right_operation.operation)
-        left_operation.initialize()
-        right_operation.initialize()
         stats.checkpoints_counter += 1
     else:
         return False
     return True
     
-        
 def calculation(count, operation: str):
     if operation[0] == "+" or operation[0] == "-":
         count += int(operation)
@@ -280,21 +279,15 @@ def main(): # for your information, in short, this function will be executed onc
                 pygame.quit()
             sprite.movement_check(event)
         
-        if (left_operation.position_y <= screen_height) and stats.checkpoints_counter <= 10:
-            if operation_check():
+        if stats.checkpoints_counter <= 10:
+            if operation_check() and left_operation.position_y <= screen_height:
                 left_operation.initialize()
-                left_operation.generate_random_operation()
                 right_operation.initialize()
+                left_operation.generate_random_operation()
                 right_operation.generate_random_operation()  
-            left_operation.move(0, speed)   
-            
-        if (right_operation.position_y <= screen_height) and stats.checkpoints_counter <= 10:
-            if operation_check():
-                left_operation.initialize()
-                left_operation.generate_random_operation()
-                right_operation.initialize()
-                right_operation.generate_random_operation()
-            right_operation.move(0, speed)   
+            else:
+                left_operation.move(0, speed)
+                right_operation.move(0, speed)
         
         sprite.movement_prompt()
         
