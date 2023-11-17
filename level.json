@@ -1,0 +1,104 @@
+[
+    {
+        "level" : 1,
+
+        "margin" : 
+        [
+            {
+                "name" : "top_margin",
+                "position_x" : 0,
+                "position_y" : 0,
+                "width" : 500,
+                "height" : 100,
+                "color" : "grey"
+            },
+
+            {
+                "name" : "bottom_margin",
+                "position_x" : 0,
+                "position_y" : 600,
+                "width" : 500,
+                "height" : 100,
+                "color" : "grey"
+            },
+
+            {
+                "name" : "left_margin",
+                "position_x" : 0,
+                "position_y" : 100,
+                "width" : 100,
+                "height" : 500,
+                "color" : "grey"
+            },
+
+            {
+                "name" : "right_margin",
+                "position_x" : 400,
+                "position_y" : 100,
+                "width" : 100,
+                "height" : 500,
+                "color" : "grey"
+            }
+        ],
+
+        "obstacles" : 
+        [
+            
+        ]
+    },
+
+    {
+        "level" : 2,
+
+        "margin" : 
+        [
+            {
+                "name" : "top_margin",
+                "position_x" : 0,
+                "position_y" : 0,
+                "width" : 500,
+                "height" : 100,
+                "color" : "grey"
+            },
+
+            {
+                "name" : "bottom_margin",
+                "position_x" : 0,
+                "position_y" : 600,
+                "width" : 500,
+                "height" : 100,
+                "color" : "grey"
+            },
+
+            {
+                "name" : "left_margin",
+                "position_x" : 0,
+                "position_y" : 100,
+                "width" : 100,
+                "height" : 500,
+                "color" : "grey"
+            },
+
+            {
+                "name" : "right_margin",
+                "position_x" : 400,
+                "position_y" : 100,
+                "width" : 100,
+                "height" : 500,
+                "color" : "grey"
+            }
+        ],
+
+        "obstacles" : 
+        [
+            {
+                "name" : "Tree",
+                "position_x" : 300,
+                "position_y" : 200,
+                "width" : 50,
+                "height" : 100,
+                "image_file_basename" : "to be added"
+            }
+        ]
+    }
+]
