@@ -2,6 +2,12 @@
     {
         "level" : 1,
 
+        "speed" : 5,
+
+        "maximum_operation_number" : 10,
+
+        "arithmetic_operators": ["+", "-", "*", "/"],
+
         "margin" : 
         [
             {
@@ -44,11 +50,27 @@
         "obstacles" : 
         [
             
-        ]
+        ],
+
+        "boss" :
+        {
+            "name" : "big_smurf_cat",
+            "position_x" : 350,
+            "position_y" : 0,
+            "width" : 200,
+            "height" : 250,
+            "image_file_basename" : "boss.png"
+        }
     },
 
     {
         "level" : 2,
+
+        "speed" : 10,
+
+        "maximum_operation_number" : 20,
+
+        "arithmetic_operators": ["+", "-", "*", "/"],
 
         "margin" : 
         [
