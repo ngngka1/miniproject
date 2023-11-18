@@ -300,8 +300,10 @@ def draw_main_screen():
     screen.blit(sprite.surface_scaled, (sprite.position_x, sprite.position_y))
     
     # print stats on the right side of the screen
+    level_display_txt_surface = FONT_SMALL.render(f"Your current level: {current_level}", True, ImageColor.getrgb("black"))
     sum_counter_txt_surface = FONT_SMALL.render("Your current score:", True, ImageColor.getrgb("black"))
     sum_counter_surface = FONT_LARGE.render(str(int(stats.sum_counter)), True, ImageColor.getrgb("black"))
+    screen.blit(level_display_txt_surface, (margin_rect_width + 20, screen_height / 2 - 50))
     screen.blit(sum_counter_txt_surface, (margin_rect_width + 20, screen_height / 2))
     screen.blit(sum_counter_surface, (margin_rect_width + 20, screen_height / 2 + 50))
 
@@ -313,6 +315,10 @@ def draw_level_transition_screen():
         txt_surface2 = FONT_SMALL.render("Press enter to continue to the next level", True, ImageColor.getrgb("black"))
         txt_surface1_rect = txt_surface1.get_rect(center = (margin_rect_width / 2, margin_rect_height / 2))
         txt_surface2_rect = txt_surface2.get_rect(center = (margin_rect_width / 2, margin_rect_height / 2 + 50))
+        txt_surface1_box_surface = pygame.rect.Rect(txt_surface1_rect)
+        txt_surface2_box_surface = pygame.rect.Rect(txt_surface2_rect)
+        pygame.draw.rect(screen, ImageColor.getrgb("green"), txt_surface1_box_surface, 0)
+        pygame.draw.rect(screen, ImageColor.getrgb("green"), txt_surface2_box_surface, 0)
         screen.blit(txt_surface1, txt_surface1_rect)
         screen.blit(txt_surface2, txt_surface2_rect)
     else:
@@ -320,6 +326,10 @@ def draw_level_transition_screen():
         txt_surface2 = FONT_SMALL.render("Press enter to retry", True, ImageColor.getrgb("black"))
         txt_surface1_rect = txt_surface1.get_rect(center = (margin_rect_width / 2, margin_rect_height / 2))
         txt_surface2_rect = txt_surface2.get_rect(center = (margin_rect_width / 2, margin_rect_height / 2 + 50))
+        txt_surface1_box_surface = pygame.rect.Rect(txt_surface1_rect)
+        txt_surface2_box_surface = pygame.rect.Rect(txt_surface2_rect)
+        pygame.draw.rect(screen, ImageColor.getrgb("green"), txt_surface1_box_surface, 0)
+        pygame.draw.rect(screen, ImageColor.getrgb("green"), txt_surface2_box_surface, 0)
         screen.blit(txt_surface1, txt_surface1_rect)
         screen.blit(txt_surface2, txt_surface2_rect)
     pygame.display.update()
