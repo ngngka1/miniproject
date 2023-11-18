@@ -2,73 +2,9 @@
     {
         "level" : 1,
 
-        "speed" : 5,
+        "speed" : 2,
 
         "maximum_operation_number" : 10,
-
-        "arithmetic_operators": ["+", "-", "*", "/"],
-
-        "margin" : 
-        [
-            {
-                "name" : "top_margin",
-                "position_x" : 0,
-                "position_y" : 0,
-                "width" : 500,
-                "height" : 100,
-                "color" : "grey"
-            },
-
-            {
-                "name" : "bottom_margin",
-                "position_x" : 0,
-                "position_y" : 600,
-                "width" : 500,
-                "height" : 100,
-                "color" : "grey"
-            },
-
-            {
-                "name" : "left_margin",
-                "position_x" : 0,
-                "position_y" : 100,
-                "width" : 100,
-                "height" : 500,
-                "color" : "grey"
-            },
-
-            {
-                "name" : "right_margin",
-                "position_x" : 400,
-                "position_y" : 100,
-                "width" : 100,
-                "height" : 500,
-                "color" : "grey"
-            }
-        ],
-
-        "obstacles" : 
-        [
-            
-        ],
-
-        "boss" :
-        {
-            "name" : "big_smurf_cat",
-            "position_x" : 350,
-            "position_y" : 0,
-            "width" : 200,
-            "height" : 250,
-            "image_file_basename" : "boss.png"
-        }
-    },
-
-    {
-        "level" : 2,
-
-        "speed" : 10,
-
-        "maximum_operation_number" : 20,
 
         "arithmetic_operators": ["+", "-", "*", "/"],
 
@@ -119,8 +55,95 @@
                 "position_y" : 200,
                 "width" : 50,
                 "height" : 100,
-                "image_file_basename" : "to be added"
+                "color": null,
+                "image_file_basename" : "tree.png"
             }
-        ]
+        ],
+
+        "boss" :
+        {
+            "name" : "big_smurf_cat",
+            "position_x" : 350,
+            "position_y" : 0,
+            "width" : 200,
+            "height" : 250,
+            "image_file_basename" : "boss.png",
+            "difficulty_scale" : 0.3
+        }
+    },
+
+    {
+        "level" : 2,
+
+        "speed" : 10,
+
+        "maximum_operation_number" : 20,
+
+        "difficulty_scale" : 0.4,
+
+        "arithmetic_operators": ["+", "-", "*", "/"],
+
+        "margin" : 
+        [
+            {
+                "name" : "top_margin",
+                "position_x" : 0,
+                "position_y" : 0,
+                "width" : 500,
+                "height" : 100,
+                "color" : "grey"
+            },
+
+            {
+                "name" : "bottom_margin",
+                "position_x" : 0,
+                "position_y" : 600,
+                "width" : 500,
+                "height" : 100,
+                "color" : "grey"
+            },
+
+            {
+                "name" : "left_margin",
+                "position_x" : 0,
+                "position_y" : 100,
+                "width" : 100,
+                "height" : 500,
+                "color" : "grey"
+            },
+
+            {
+                "name" : "right_margin",
+                "position_x" : 400,
+                "position_y" : 100,
+                "width" : 100,
+                "height" : 500,
+                "color" : "grey"
+            }
+        ],
+
+        "obstacles" : 
+        [
+            {
+                "name" : "Tree",
+                "position_x" : 300,
+                "position_y" : 200,
+                "width" : 50,
+                "height" : 100,
+                "color": null,
+                "image_file_basename" : "tree.png"
+            }
+        ],
+
+        "boss" :
+        {
+            "name" : "big_smurf_cat",
+            "position_x" : 350,
+            "position_y" : 0,
+            "width" : 200,
+            "height" : 250,
+            "image_file_basename" : "boss.png",
+            "difficulty_scale" : 0.4
+        }
     }
 ]

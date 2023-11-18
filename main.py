@@ -70,6 +70,11 @@ class sprite_type:
         self.hitbox = pygame.Rect(self.position_x, self.position_y, self.width, self.height)
         for wall in wall_objects:
             if self.hitbox.colliderect(wall.hitbox): # basically, this block checks sprite's collision with obstacles
+                if type(wall) == obstacle_type:
+                    if pygame.Rect(prev_position_x, prev_position_y, self.width, self.height).colliderect(wall.hitbox):
+                        self.position_y = prev_position_y + speed
+                        self.hitbox = pygame.Rect(self.position_x, self.position_y, self.width, self.height)
+                        continue
                 if pygame.Rect(self.position_x, prev_position_y, self.width, self.height).colliderect(wall.hitbox):
                     self.position_x = self.position_x - (self.position_x + self.width * (1 - int(prev_position_x / (wall.position_x + wall.width))) - wall.position_x - wall.width * int(prev_position_x / (wall.position_x + wall.width)))
                 if pygame.Rect(prev_position_x, self.position_y, self.width, self.height).colliderect(wall.hitbox):
@@ -88,7 +93,7 @@ class wall_object_type:
         if image_file_basename:
             self.path = os.path.join("assets", image_file_basename)
             self.surface_unscaled = pygame.image.load(self.path)
-            self.surface_scaled = pygame.transform.scale(surface_unscaled, (self.width, self.height))
+            self.surface_scaled = pygame.transform.scale(self.surface_unscaled, (self.width, self.height))
         else:
             self.path = None
             self.surface_unscaled = None
@@ -136,7 +141,7 @@ class operation_option_type:
         self.hitbox.move_ip(move_by_x, move_by_y)
         
 class boss_type:
-    def __init__(self, name, position_x, position_y, width, height, image_file_basename):
+    def __init__(self, name, position_x, position_y, width, height, image_file_basename, difficulty_scale):
         self.name = name
         self.position_x = position_x
         self.position_y = position_y
@@ -147,6 +152,8 @@ class boss_type:
         self.surface_scaled = pygame.transform.scale(self.surface_unscaled, (self.width, self.height))
         self.surface_scaled_rect = self.surface_scaled.get_rect(center = (margin_rect_width / 2, self.position_y))
         self.hitbox = pygame.rect.Rect(self.surface_scaled_rect)
+        self.difficulty_scale = difficulty_scale 
+        self.health = 1
         
     def move(self, move_by_x, move_by_y):
         self.position_x += move_by_x
@@ -161,7 +168,7 @@ class gamestats:
         self.maximum_sum = 1
         
     def maximum_change(self, num):
-        maximum_num = max(calculation(num, left_operation.operation), calculation(num, right_operation.operation))
+        maximum_num = ( max(calculation(num, left_operation.operation), calculation(num, right_operation.operation)) + min(calculation(num, left_operation.operation), calculation(num, right_operation.operation)) ) / 2
         if maximum_num > num:
             return maximum_num
         else:
@@ -196,7 +203,14 @@ def load_wall_objects():
         for level_prop in level_prop_dict:
             if level_prop["level"] == current_level: # Note: (if current_level exceeded the total number of level there is, the screen will simply not print any wall objects)
                 
+                for obstacle_object in level_prop["obstacles"]:
+                    if obstacle_object["color"]:
+                        wall_objects.append(obstacle_type(obstacle_object["name"], obstacle_object["position_x"], obstacle_object["position_y"], obstacle_object["width"], obstacle_object["height"], obstacle_object["color"], None))
+                    elif obstacle_object["image_file_basename"]:
+                        wall_objects.append(obstacle_type(obstacle_object["name"], obstacle_object["position_x"], obstacle_object["position_y"], obstacle_object["width"], obstacle_object["height"], None, obstacle_object["image_file_basename"]))
+                
                 for margin_object in level_prop["margin"]:
+                    
                     if margin_object["color"]:
                         wall_objects.append(margin_type(margin_object["name"], margin_object["position_x"], margin_object["position_y"], margin_object["width"], margin_object["height"], margin_object["color"], None))
                     elif margin_object["image_file_basename"]:
@@ -212,11 +226,7 @@ def load_wall_objects():
                         global margin_rect_height
                         margin_rect_height = screen_height
                         
-                for obstacle_object in level_prop["obstacles"]:
-                    if obstacle_object["color"]:
-                        wall_objects.append(obstacle_type(margin_object["name"], margin_object["position_x"], margin_object["position_y"], margin_object["width"], margin_object["height"], margin_object["color"], None))
-                    elif obstacle_object["image_file_basename"]:
-                        wall_objects.append(obstacle_type(margin_object["name"], margin_object["position_x"], margin_object["position_y"], margin_object["width"], margin_object["height"], None, margin_object["image_file_basename"]))
+                
     
 def load_level_attribute():
     global maximum_operation_number
@@ -235,7 +245,7 @@ def load_level_attribute():
                 right_operation = operation_option_type(screen_width / 2 + 100, 0, arithmetic_operators)
                 left_operation.generate_random_operation()
                 right_operation.generate_random_operation()
-                boss = boss_type(level_prop["boss"]["name"], level_prop["boss"]["position_x"], level_prop["boss"]["position_y"], level_prop["boss"]["width"], level_prop["boss"]["height"], level_prop["boss"]["image_file_basename"])
+                boss = boss_type(level_prop["boss"]["name"], level_prop["boss"]["position_x"], level_prop["boss"]["position_y"], level_prop["boss"]["width"], level_prop["boss"]["height"], level_prop["boss"]["image_file_basename"], level_prop["boss"]["difficulty_scale"])
                 break
 
 def load_stats():
@@ -288,7 +298,11 @@ def draw_main_screen():
     
     # print stats on the right side of the screen
     sum_counter_surface = FONT.render(str(stats.sum_counter), True, ImageColor.getrgb("black"))
-    screen.blit(sum_counter_surface, (margin_rect_width + 50, screen_height / 2))
+    maximum_sum_surface = FONT.render(str(stats.maximum_sum), True, ImageColor.getrgb("black"))
+    temp_boss_health_surface = FONT.render(str(boss.health), True, ImageColor.getrgb("black"))
+    screen.blit(sum_counter_surface, (margin_rect_width + 20, screen_height / 2))
+    screen.blit(maximum_sum_surface, (margin_rect_width + 20, screen_height / 2 + 50))
+    screen.blit(temp_boss_health_surface, (margin_rect_width + 20, screen_height / 2 + 100))
 
     pygame.display.update()
         
@@ -306,14 +320,18 @@ def main(): # for your information, in short, this function will be executed onc
         
         if stats.checkpoints_counter <= 10:
             if operation_check() or left_operation.position_y > screen_height:
+                stats.maximum_sum = stats.maximum_change(stats.maximum_sum) # keep track of the largest sum possible
+                boss.health = (boss.health + stats.maximum_sum) / 2 * boss.difficulty_scale
                 left_operation.initialize()
                 right_operation.initialize()
                 left_operation.generate_random_operation()
                 right_operation.generate_random_operation()
-                stats.maximum_sum = stats.maximum_change(stats.maximum_sum)
             else:
                 left_operation.move(0, speed)
                 right_operation.move(0, speed)
+                for wall in wall_objects:
+                    if type(wall) == obstacle_type:
+                        wall.move(0, speed)
         else:
             boss.move(0, speed / 3)
             
