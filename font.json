@@ -1,4 +1,5 @@
 {
-    "Font_size" : 80,
+    "font_size_large" : 60,
+    "font_size_small" : 30,
     "ttf_file_basename": "SunnySpellsBasicRegular-Yz1Wv.ttf"
 }

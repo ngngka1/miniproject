@@ -2,7 +2,7 @@
     {
         "level" : 1,
 
-        "speed" : 2,
+        "speed" : 5,
 
         "maximum_operation_number" : 10,
 
@@ -51,12 +51,13 @@
         [
             {
                 "name" : "Tree",
-                "position_x" : 300,
-                "position_y" : 200,
+                "position_x" : 200,
+                "position_y" : 0,
                 "width" : 50,
                 "height" : 100,
                 "color": null,
-                "image_file_basename" : "tree.png"
+                "image_file_basename" : "tree.png",
+                "appearance_checkpoint" : 2
             }
         ],
 
@@ -126,12 +127,13 @@
         [
             {
                 "name" : "Tree",
-                "position_x" : 300,
-                "position_y" : 200,
+                "position_x" : 200,
+                "position_y" : 0,
                 "width" : 50,
                 "height" : 100,
                 "color": null,
-                "image_file_basename" : "tree.png"
+                "image_file_basename" : "tree.png",
+                "appearance_checkpoint" : 2
             }
         ],
 
