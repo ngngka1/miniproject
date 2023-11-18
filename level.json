@@ -2,11 +2,11 @@
     {
         "level" : 1,
 
-        "speed" : 5,
+        "speed" : 3,
 
         "maximum_operation_number" : 10,
 
-        "arithmetic_operators": ["+", "-", "*", "/"],
+        "arithmetic_operators": ["+", "*", "-", "/"],
 
         "margin" : 
         [
@@ -51,7 +51,7 @@
         [
             {
                 "name" : "Tree",
-                "position_x" : 200,
+                "position_x" : 250,
                 "position_y" : 0,
                 "width" : 50,
                 "height" : 100,
@@ -69,20 +69,19 @@
             "width" : 200,
             "height" : 250,
             "image_file_basename" : "boss.png",
-            "difficulty_scale" : 0.3
+            "difficulty_scale" : 1
         }
     },
 
     {
         "level" : 2,
 
-        "speed" : 10,
+        "speed" : 6,
 
         "maximum_operation_number" : 20,
 
-        "difficulty_scale" : 0.4,
 
-        "arithmetic_operators": ["+", "-", "*", "/"],
+        "arithmetic_operators": ["+", "*", "-", "/"],
 
         "margin" : 
         [
@@ -145,7 +144,92 @@
             "width" : 200,
             "height" : 250,
             "image_file_basename" : "boss.png",
-            "difficulty_scale" : 0.4
+            "difficulty_scale" : 1.1
+        }
+    },
+
+    {
+        "level" : 3,
+
+        "speed" : 9,
+
+        "maximum_operation_number" : 30,
+
+        "arithmetic_operators": ["+", "*", "-", "/"],
+
+        "margin" : 
+        [
+            {
+                "name" : "top_margin",
+                "position_x" : 0,
+                "position_y" : 0,
+                "width" : 500,
+                "height" : 100,
+                "color" : "grey"
+            },
+
+            {
+                "name" : "bottom_margin",
+                "position_x" : 0,
+                "position_y" : 600,
+                "width" : 500,
+                "height" : 100,
+                "color" : "grey"
+            },
+
+            {
+                "name" : "left_margin",
+                "position_x" : 0,
+                "position_y" : 100,
+                "width" : 100,
+                "height" : 500,
+                "color" : "grey"
+            },
+
+            {
+                "name" : "right_margin",
+                "position_x" : 400,
+                "position_y" : 100,
+                "width" : 100,
+                "height" : 500,
+                "color" : "grey"
+            }
+        ],
+
+        "obstacles" : 
+        [
+            {
+                "name" : "Tree",
+                "position_x" : 200,
+                "position_y" : 0,
+                "width" : 50,
+                "height" : 100,
+                "color": null,
+                "image_file_basename" : "tree.png",
+                "appearance_checkpoint" : 2
+            },
+
+            {
+                "name" : "Tree",
+                "position_x" : 300,
+                "position_y" : 0,
+                "width" : 50,
+                "height" : 150,
+                "color": null,
+                "image_file_basename" : "tree.png",
+                "appearance_checkpoint" : 4
+            }
+        ],
+
+        "boss" :
+        {
+            "name" : "big_smurf_cat",
+            "position_x" : 350,
+            "position_y" : 0,
+            "width" : 200,
+            "height" : 250,
+            "image_file_basename" : "boss.png",
+            "difficulty_scale" : 1.2
         }
     }
 ]

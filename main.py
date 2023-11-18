@@ -62,11 +62,11 @@ class sprite_type:
             self.position_x += 3
         if self.move_left:
             self.position_x -= 3
-####################################################
-        if self.move_down:
-            self.position_y += 3
-        if self.move_up:
-            self.position_y -= 3   
+#####################################################
+#        if self.move_down:                         #
+#            self.position_y += 3                   #
+#        if self.move_up:                           #
+#            self.position_y -= 3                   #
 #####################################################      
         self.hitbox = pygame.Rect(self.position_x, self.position_y, self.width, self.height)
         for wall in wall_objects:
@@ -121,19 +121,24 @@ class operation_option_type:
         self.operation = None
         self.position_x = position_x
         self.position_y = position_y
-        self.width = 100
+        self.width = (margin_rect_width - 2 * margin_width) / 2
         self.height = 100
         self.txt_surface = None
         self.txt_surface_rect = None
         self.hitbox = None
+        self.color = None
         
-    def generate_random_operation(self):
-        self.operator = self.available_arithmetic_operators[random.randint(0, len(self.available_arithmetic_operators) - 1)]
+    def generate_random_operation(self, *add_only_flag):
+        if add_only_flag:
+            self.operator = "+"
+        else:
+            self.operator = self.available_arithmetic_operators[random.randint(0, len(self.available_arithmetic_operators) - 1)]
         self.number = random.randint(1, maximum_operation_number) 
         self.operation = self.operator + str(self.number)
-        self.txt_surface = FONT_LARGE.render(self.operation, True, ImageColor.getrgb("black"), ImageColor.getrgb("green"))
+        self.txt_surface = FONT_LARGE.render(self.operation, True, ImageColor.getrgb("black"))
         self.txt_surface_rect = self.txt_surface.get_rect(center = ((abs(margin_rect_width * int(self.position_x / (margin_rect_width / 2)) - margin_width) + (margin_rect_width / 2)) / 2, self.position_y))
-        self.hitbox = pygame.rect.Rect(self.txt_surface_rect)
+        self.hitbox = pygame.rect.Rect(self.position_x, self.position_y, self.width, self.height)
+        self.color = random_color()
     
     def initialize(self):
         self.position_y = 0
@@ -169,14 +174,8 @@ class gamestats:
     def __init__(self, sum_counter, checkpoints_counter):
         self.sum_counter = sum_counter
         self.checkpoints_counter = checkpoints_counter
-        self.maximum_sum = 1
-        
-    def maximum_change(self, num):
-        maximum_num = max(calculation(num, left_operation.operation), calculation(num, right_operation.operation))
-        if maximum_num > num:
-            return maximum_num
-        else:
-            return num
+
+    
 
 def load_sprite_property():
     global sprite
@@ -243,8 +242,8 @@ def load_level_attribute():
                 maximum_operation_number = level_prop["maximum_operation_number"]
                 speed = level_prop["speed"]
                 arithmetic_operators = level_prop["arithmetic_operators"]
-                left_operation = operation_option_type(margin_rect_width / 2 - 100, 0, arithmetic_operators)
-                right_operation = operation_option_type(margin_rect_width / 2 + 100, 0, arithmetic_operators)
+                left_operation = operation_option_type(margin_width, 0, arithmetic_operators)
+                right_operation = operation_option_type(margin_rect_width / 2, 0, arithmetic_operators)
                 left_operation.generate_random_operation()
                 right_operation.generate_random_operation()
                 boss = boss_type(level_prop["boss"]["name"], level_prop["boss"]["position_x"], level_prop["boss"]["position_y"], level_prop["boss"]["width"], level_prop["boss"]["height"], level_prop["boss"]["image_file_basename"], level_prop["boss"]["difficulty_scale"])
@@ -270,18 +269,24 @@ def calculation(count, operation: str):
         count *= int(operation[1:])
     elif operation[0] == "/":
         count /= int(operation[1:])
-    return count
+    if count < 0:
+        return 0
+    else:
+        return count
+
+def random_color():
+    return (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
 
 def draw_main_screen():
-    # initialize the screen by filling it with color white
+    # initialize the map
     screen.fill(screen_bgcolor)
     
     # print the operation / boss
     if stats.checkpoints_counter < 10:
-        pygame.draw.rect(screen, ImageColor.getrgb("green"), left_operation.hitbox, 0) # left
+        pygame.draw.rect(screen, left_operation.color, left_operation.hitbox, 0) # left
         screen.blit(left_operation.txt_surface, left_operation.txt_surface_rect)
         
-        pygame.draw.rect(screen, ImageColor.getrgb("green"), right_operation.hitbox, 0) # right
+        pygame.draw.rect(screen, right_operation.color, right_operation.hitbox, 0) # right
         screen.blit(right_operation.txt_surface, right_operation.txt_surface_rect)
     else:
         screen.blit(boss.surface_scaled, boss.surface_scaled_rect)
@@ -353,14 +358,21 @@ def main(): # for your information, in short, this function will be executed onc
         
         if level_passed == False and level_failed == False:
             if stats.checkpoints_counter < 10:
-                if operation_check() or left_operation.position_y > screen_height: # if operation hits player / reach margin
-                    stats.maximum_sum = stats.maximum_change(stats.maximum_sum) # keep track of the largest sum possible
-                    boss.health = (boss.health + stats.maximum_sum) / 2 * boss.difficulty_scale # divide (health + max result after operation) by 2 to avoid overly extreme value
+                if operation_check() or left_operation.position_y > screen_height:
+                    boss.health = (calculation(boss.health, left_operation.operation) + calculation(boss.health, right_operation.operation)) / 2 # take mean to avoid overly extreme value
                     left_operation.initialize()
                     right_operation.initialize()
                     left_operation.generate_random_operation()
                     right_operation.generate_random_operation()
+                    if left_operation.operation[0] == right_operation.operation[0] or stats.sum_counter <= 1: # avoid extreme value change due to division
+                        right_operation.initialize()
+                        if stats.sum_counter <= 1:
+                            right_operation.generate_random_operation(1)
+                        else:
+                            right_operation.generate_random_operation()
                     stats.checkpoints_counter += 1
+                    if stats.checkpoints_counter == 10:
+                        boss.health *= boss.difficulty_scale
                 else:
                     left_operation.move(0, speed)
                     right_operation.move(0, speed)
@@ -368,7 +380,7 @@ def main(): # for your information, in short, this function will be executed onc
                         if type(wall) == obstacle_type and (stats.checkpoints_counter == wall.appearance_checkpoint or wall.position_y > 0):
                             wall.move(0, speed)
             else:
-                boss.move(0, int(speed / 3))
+                boss.move(0, speed)
                 if sprite.hitbox.colliderect(boss.hitbox):
                     if stats.sum_counter >= boss.health:
                         level_passed = True
@@ -380,11 +392,11 @@ def main(): # for your information, in short, this function will be executed onc
                 if not level_failed:
                     current_level += 1
                     load_wall_objects()
-                    load_level_attribute()
                 level_passed = False
                 level_continue = False
                 level_failed = False
                 load_stats()
+                load_level_attribute()
             else:
                 draw_level_transition_screen()
     
@@ -392,7 +404,7 @@ def main(): # for your information, in short, this function will be executed onc
 ## The following lines are data of the screen window
 screen_width = 1000
 screen_height = 700
-screen_bgcolor = ImageColor.getrgb("white") # PIL.ImageColor.getrgb(color) to get rgb value of color
+screen_bgcolor = (225,225,225) # PIL.ImageColor.getrgb(color) to get rgb value of color
 screen = pygame.display.set_mode((screen_width, screen_height)) # this line makes a screen with the width and height specified
 pygame.display.set_caption("Number game")
 fps = 60
