@@ -77,6 +77,9 @@ class sprite_type:
                 if pygame.Rect(prev_position_x, self.position_y, self.width, self.height).colliderect(wall.hitbox):
                     self.position_y = self.position_y - (self.position_y + self.height * (1 - int(prev_position_y / (wall.position_y + wall.height)) ) - wall.position_y - wall.height * int(prev_position_y / (wall.position_y + wall.height)))
                 
+                if self.hitbox.colliderect(wall.hitbox): # if still collide, it means its pushed into wall
+                        self.position_x = prev_position_x
+                        self.position_y = prev_position_y
                 self.hitbox = pygame.Rect(self.position_x, self.position_y, self.width, self.height)
                 
 class wall_object_type:
@@ -269,7 +272,7 @@ def operation_check():
         return False
     return True
     
-def calculation(count, operation: str):
+def calculation(count: int, operation: str):
     if operation[0] == "+" or operation[0] == "-":
         count += int(operation)
     elif operation[0] == "*":
@@ -296,21 +299,17 @@ def update_hof_list(new_score):
         else:
             hof_list.append(new_score)
     else:
-        counter = 0
-        appended = False 
         for i in range(0, len(hof_list)):
             if hof_list[i]["name"] == new_score["name"] and hof_list[i]["maximum_level_reached"] < new_score["maximum_level_reached"]:
-                hof_list[i] = new_score
-                appended = True
+                hof_list.pop(i)
                 break
-            
-        while counter < len(hof_list) - 1 and not appended:
-            if hof_list[counter+1]["maximum_level_reached"] < new_score["maximum_level_reached"] and hof_list[counter]["maximum_level_reached"] > new_score["maximum_level_reached"]:
+        counter = 0
+        while counter < len(hof_list) - 1:
+            if hof_list[counter+1]["maximum_level_reached"] < new_score["maximum_level_reached"] and hof_list[counter]["maximum_level_reached"] >= new_score["maximum_level_reached"]:
                 break
             else:
                 counter += 1
-        if not appended:
-            hof_list.insert(counter + 1, new_score)
+        hof_list.insert(counter + 1, new_score)
             
     with open("hall_of_fame.json", "w") as hof_file:
         hof_file.write(json.dumps(hof_list))
