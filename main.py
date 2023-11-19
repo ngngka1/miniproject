@@ -104,7 +104,10 @@ class wall_object_type:
 class obstacle_type(wall_object_type):
     def __init__(self, param1, param2, param3, param4, param5, param6, param7, appearance_checkpoint):
         wall_object_type.__init__(self, param1, param2, param3, param4, param5, param6, param7)
+        self.position_y -= self.height
+        self.hitbox.move_ip(0, - self.height)
         self.appearance_checkpoint = appearance_checkpoint
+
     def move(self, move_by_x: int, move_by_y: int):
         self.position_x += move_by_x
         self.position_y += move_by_y
@@ -135,7 +138,10 @@ class operation_option_type:
             self.operator = self.available_arithmetic_operators[random.randint(0, len(self.available_arithmetic_operators) - 1)]
         self.number = random.randint(1, maximum_operation_number) 
         self.operation = self.operator + str(self.number)
-        self.txt_surface = FONT_LARGE.render(self.operation, True, ImageColor.getrgb("black"))
+        if random.randint(0, 10) == 0: # 10 % surprise
+            self.txt_surface = FONT_LARGE.render("???", True, ImageColor.getrgb("black"))
+        else:
+            self.txt_surface = FONT_LARGE.render(self.operation, True, ImageColor.getrgb("black"))
         self.txt_surface_rect = self.txt_surface.get_rect(center = ((abs(margin_rect_width * int(self.position_x / (margin_rect_width / 2)) - margin_width) + (margin_rect_width / 2)) / 2, self.position_y))
         self.hitbox = pygame.rect.Rect(self.position_x, self.position_y, self.width, self.height)
         self.color = random_color()
@@ -254,7 +260,12 @@ def load_stats():
     stats = gamestats(1, 0)
     
 def operation_check():
-    if sprite.hitbox.colliderect(left_operation.hitbox):
+    if sprite.hitbox.colliderect(left_operation.hitbox) and sprite.hitbox.colliderect(right_operation.hitbox):
+        if (2 * sprite.position_x + sprite.width - 2 * left_operation.position_x - left_operation.width) / 2 <= (2 * right_operation.position_x + right_operation.width - 2 * sprite.position_x - sprite.width) / 2:
+            stats.sum_counter = calculation(stats.sum_counter, left_operation.operation)
+        else:
+            stats.sum_counter = calculation(stats.sum_counter, right_operation.operation)
+    elif sprite.hitbox.colliderect(left_operation.hitbox):
         stats.sum_counter = calculation(stats.sum_counter, left_operation.operation)
     elif sprite.hitbox.colliderect(right_operation.hitbox):
         stats.sum_counter = calculation(stats.sum_counter, right_operation.operation)
@@ -279,13 +290,34 @@ def random_color():
 
 def update_hof_list(new_score):
     global hof_list
-    for i in range(0, len(hof_list)):
-        if hof_list[i]["name"] == new_score["name"] and hof_list[i]["maximum_level_reached"] < new_score["maximum_level_reached"]:
-            hof_list[i]["maximum_level_reached"] = new_score["maximum_level_reached"]
-    
-    for i in range(0, len(hof_list) - 1):
-        if hof_list[i]["maximum_level_reached"] <= new_score["maximum_level_reached"] and hof_list[i+1]["maximum_level_reached"] > new_score["maximum_level_reached"]:
-            hof_list.insert(i + 1, new_score)
+    if len(hof_list) == 0:
+        hof_list.append(new_score)
+    elif len(hof_list) == 1:
+        if hof_list[0]["name"] == new_score["name"] and hof_list[0]["maximum_level_reached"] <= new_score["maximum_level_reached"]:
+            hof_list[0] = new_score
+        elif hof_list[0]["maximum_level_reached"] < new_score["maximum_level_reached"]:
+            hof_list.insert(0, new_score)
+        else:
+            hof_list.append(new_score)
+    else:
+        counter = 0
+        appended = False 
+        for i in range(0, len(hof_list)):
+            if hof_list[i]["name"] == new_score["name"] and hof_list[i]["maximum_level_reached"] < new_score["maximum_level_reached"]:
+                hof_list[i] = new_score
+                appended = True
+                break
+            
+        while counter < len(hof_list) - 1 and not appended:
+            if hof_list[counter+1]["maximum_level_reached"] < new_score["maximum_level_reached"] and hof_list[counter]["maximum_level_reached"] > new_score["maximum_level_reached"]:
+                break
+            else:
+                counter += 1
+        if not appended:
+            hof_list.insert(counter + 1, new_score)
+            
+    with open("hall_of_fame.json", "w") as hof_file:
+        hof_file.write(json.dumps(hof_list))
 
 def input_player_name():
     txt_surface1 = FONT_SMALL.render("Please input player name:", True, ImageColor.getrgb("black"))
@@ -294,11 +326,18 @@ def input_player_name():
     player_name = ""
     while not inputted:
         for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                inputted = True
+                pygame.quit()
+                sys.quit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
                     inputted = True
                     return player_name
-                player_name += pygame.key.name(event.key)
+                elif re.search("^[a-zA-Z0-9]{1}.{0}$", pygame.key.name(event.key)):
+                    player_name += pygame.key.name(event.key)
+                elif event.key == pygame.K_BACKSPACE:
+                    player_name = player_name[:-1]
         player_name_surface = FONT_SMALL.render(player_name, True, ImageColor.getrgb("black"))
         player_name_surface_rect = player_name_surface.get_rect(center = (screen_width / 2, screen_height / 2 + 50))
         screen.fill(screen_bgcolor)
@@ -370,12 +409,18 @@ def draw_level_transition_screen():
         screen.blit(txt_surface2, txt_surface2_rect)
         # print hall of fame box:
         hof_rect = pygame.rect.Rect(margin_rect_width + 20, margin_height, 200, 200)
+        hof_txt_surface = FONT_SMALL.render("Hall of Fame", True, ImageColor.getrgb("black"))
+        hof_txt_surface_rect = hof_txt_surface.get_rect(center = ((margin_rect_width + screen_width) / 2, 50))
+        screen.blit(hof_txt_surface, hof_txt_surface_rect)
         txt_surface3 = FONT_SMALL.render("Player             Maximum level reached", True, ImageColor.getrgb("black"))
         screen.blit(txt_surface3, (margin_rect_width + 20, margin_height))
         hof_list_cursor = 0
         for score in hof_list:
             hof_list_cursor += 30
-            score_surface = FONT_SMALL.render(score["name"] + "                    " + str(score["maximum_level_reached"]), True, ImageColor.getrgb("black"))
+            if player["name"] == score["name"]:
+                score_surface = FONT_SMALL.render(score["name"] + "                    " + str(score["maximum_level_reached"]), True, ImageColor.getrgb("green"))
+            else:
+                score_surface = FONT_SMALL.render(score["name"] + "                    " + str(score["maximum_level_reached"]), True, ImageColor.getrgb("black"))
             screen.blit(score_surface, (margin_rect_width + 20, margin_height + hof_list_cursor))
         
     pygame.display.update()
@@ -419,6 +464,8 @@ def main(): # for your information, in short, this function will be executed onc
                     right_operation.move(0, speed)
                     for wall in wall_objects:
                         if type(wall) == obstacle_type and (stats.checkpoints_counter == wall.appearance_checkpoint or wall.position_y > 0):
+                            if wall.position_y < 0:
+                                wall.move(0, - wall.position_y)
                             wall.move(0, speed)
             else:
                 boss.move(0, speed)
