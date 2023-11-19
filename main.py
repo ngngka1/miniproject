@@ -245,7 +245,7 @@ def load_level_attribute():
                 left_operation = operation_option_type(margin_width, 0, arithmetic_operators)
                 right_operation = operation_option_type(margin_rect_width / 2, 0, arithmetic_operators)
                 left_operation.generate_random_operation()
-                right_operation.generate_random_operation()
+                right_operation.generate_random_operation(1)
                 boss = boss_type(level_prop["boss"]["name"], level_prop["boss"]["position_x"], level_prop["boss"]["position_y"], level_prop["boss"]["width"], level_prop["boss"]["height"], level_prop["boss"]["image_file_basename"], level_prop["boss"]["difficulty_scale"])
                 break
 
@@ -277,6 +277,35 @@ def calculation(count, operation: str):
 def random_color():
     return (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
 
+def update_hof_list(new_score):
+    global hof_list
+    for i in range(0, len(hof_list)):
+        if hof_list[i]["name"] == new_score["name"] and hof_list[i]["maximum_level_reached"] < new_score["maximum_level_reached"]:
+            hof_list[i]["maximum_level_reached"] = new_score["maximum_level_reached"]
+    
+    for i in range(0, len(hof_list) - 1):
+        if hof_list[i]["maximum_level_reached"] <= new_score["maximum_level_reached"] and hof_list[i+1]["maximum_level_reached"] > new_score["maximum_level_reached"]:
+            hof_list.insert(i + 1, new_score)
+
+def input_player_name():
+    txt_surface1 = FONT_SMALL.render("Please input player name:", True, ImageColor.getrgb("black"))
+    txt_surface1_rect = txt_surface1.get_rect(center = (screen_width / 2, screen_height / 2))
+    inputted = False
+    player_name = ""
+    while not inputted:
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RETURN:
+                    inputted = True
+                    return player_name
+                player_name += pygame.key.name(event.key)
+        player_name_surface = FONT_SMALL.render(player_name, True, ImageColor.getrgb("black"))
+        player_name_surface_rect = player_name_surface.get_rect(center = (screen_width / 2, screen_height / 2 + 50))
+        screen.fill(screen_bgcolor)
+        screen.blit(txt_surface1, txt_surface1_rect)
+        screen.blit(player_name_surface, player_name_surface_rect)
+        pygame.display.update()
+                  
 def draw_main_screen():
     # initialize the map
     screen.fill(screen_bgcolor)
@@ -315,6 +344,7 @@ def draw_main_screen():
     pygame.display.update()
         
 def draw_level_transition_screen():
+    global player
     if level_passed:
         txt_surface1 = FONT_SMALL.render(f"Congrats you have passed level {current_level}!", True, ImageColor.getrgb("black"))
         txt_surface2 = FONT_SMALL.render("Press enter to continue to the next level", True, ImageColor.getrgb("black"))
@@ -327,6 +357,7 @@ def draw_level_transition_screen():
         screen.blit(txt_surface1, txt_surface1_rect)
         screen.blit(txt_surface2, txt_surface2_rect)
     else:
+        # print prompt on game window
         txt_surface1 = FONT_SMALL.render(f"You have failed level {current_level}!", True, ImageColor.getrgb("black"))
         txt_surface2 = FONT_SMALL.render("Press enter to retry", True, ImageColor.getrgb("black"))
         txt_surface1_rect = txt_surface1.get_rect(center = (margin_rect_width / 2, margin_rect_height / 2))
@@ -337,6 +368,16 @@ def draw_level_transition_screen():
         pygame.draw.rect(screen, ImageColor.getrgb("green"), txt_surface2_box_surface, 0)
         screen.blit(txt_surface1, txt_surface1_rect)
         screen.blit(txt_surface2, txt_surface2_rect)
+        # print hall of fame box:
+        hof_rect = pygame.rect.Rect(margin_rect_width + 20, margin_height, 200, 200)
+        txt_surface3 = FONT_SMALL.render("Player             Maximum level reached", True, ImageColor.getrgb("black"))
+        screen.blit(txt_surface3, (margin_rect_width + 20, margin_height))
+        hof_list_cursor = 0
+        for score in hof_list:
+            hof_list_cursor += 30
+            score_surface = FONT_SMALL.render(score["name"] + "                    " + str(score["maximum_level_reached"]), True, ImageColor.getrgb("black"))
+            screen.blit(score_surface, (margin_rect_width + 20, margin_height + hof_list_cursor))
+        
     pygame.display.update()
 
 def main(): # for your information, in short, this function will be executed once the program is run
@@ -386,6 +427,8 @@ def main(): # for your information, in short, this function will be executed onc
                         level_passed = True
                     else:
                         level_failed = True
+                        player["maximum_level_reached"] = current_level
+                        update_hof_list(player)
             draw_main_screen()
         else:
             if level_continue:
@@ -420,6 +463,9 @@ current_level = 1
 level_passed = False
 level_failed = False
 level_continue = False
+player = {"name": input_player_name(), "maximum_level_reached": None}
+with open("hall_of_fame.json") as hof_file:
+    hof_list = json.loads(hof_file.read())
 
 load_stats()
 load_wall_objects()

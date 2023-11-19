@@ -1,0 +1,11 @@
+[
+    {
+        "name" : "test",
+        "maximum_level_reached" : 2
+    },
+
+    {
+        "name" : "test2",
+        "maximum_level_reached" : 1
+    }
+]
