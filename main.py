@@ -3,11 +3,7 @@ from PIL import ImageColor
 import os
 import sys
 import json
-import time
 import random
-#unused modules vvv
-from copy import copy
-from functools import reduce
 import re 
 
 class sprite_type: 
