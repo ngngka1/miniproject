@@ -445,7 +445,7 @@ def main(): # for your information, in short, this function will be executed onc
                     right_operation.initialize()
                     left_operation.generate_random_operation()
                     right_operation.generate_random_operation()
-                    if left_operation.operation[0] == right_operation.operation[0] or stats.sum_counter <= 1: # avoid extreme value change due to division
+                    if left_operation.operation[0] == right_operation.operation[0] or stats.sum_counter <= 1: # avoid extreme value change
                         right_operation.initialize()
                         if stats.sum_counter <= 1:
                             right_operation.generate_random_operation(1)
@@ -485,7 +485,6 @@ def main(): # for your information, in short, this function will be executed onc
             else:
                 draw_level_transition_screen()
     
-
 ## The following lines are data of the screen window
 screen_width = 1000
 screen_height = 700
