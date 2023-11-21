@@ -296,7 +296,7 @@ def update_hof_list(new_score):
             hof_list[0] = new_score
         elif hof_list[0]["maximum_level_reached"] < new_score["maximum_level_reached"]:
             hof_list.insert(0, new_score)
-        else:
+        elif hof_list[0]["name"] != new_score["name"]:
             hof_list.append(new_score)
     else:
         for i in range(0, len(hof_list)):
